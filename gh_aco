@@ -1,0 +1,68 @@
+"""Provides a scripting component.
+    Inputs:
+        x: The x script variable
+        y: The y script variable
+    Output:
+        a: The a output variable"""
+
+__author__ = "Max"
+__version__ = "2018.10.31"
+
+import rhinoscriptsyntax as rs
+import random
+
+def point_distance(a, b):
+    return (((b[0]-a[0])**2)+((b[1]-a[1])**2)+((b[2]-a[2])**2))
+    
+def possible_paths(point, paths):
+    startpoints = [rs.CurveStartPoint(i) for i in paths]
+    endpoints = [rs.CurveEndPoint(i) for i in paths]
+    
+    curve_list = []
+    
+    for j in range(len(endpoints)):
+        if point_distance(endpoints[j],point) == 0:
+            curve_list.append((point,j))
+                
+    for j in range(len(startpoints)):
+        if point_distance(startpoints[j],point) == 0:
+            curve_list.append((point,j))
+
+    return [i[1] for i in curve_list]
+    
+def walk_edge(point,edge):
+    if rs.CurveStartPoint(edge) == point:
+        return rs.CurveEndPoint(edge)
+        
+    else:
+        return rs.CurveStartPoint(edge)
+
+start_point = y[0]
+end_point = y[1]
+network = x
+pheromone = [1 for i in network]
+max_distance = 1000000
+
+
+
+def ant():
+    route = []
+    ant_location = start_point
+    while sum([rs.CurveLength(i) for i in route]) < max_distance:
+        if ant_location == end_point:
+            return route
+            
+        else:
+            path_indices = possible_paths(ant_location, network)
+            available_paths = []
+            paths_phero = []
+            for i in path_indices:
+                available_paths.append(network[i])
+                paths_phero.append(pheromone[i])
+            
+            chosen_path = random.choice(available_paths)
+            route.append(chosen_path)
+            ant_location = walk_edge(ant_location,chosen_path)
+    return route
+        
+a = ant()
