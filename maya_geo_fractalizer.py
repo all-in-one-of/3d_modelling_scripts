@@ -1,11 +1,9 @@
 import maya.cmds as cmds
 
+# recursively copy geometry onto its own faces, changing scale with every step
 def copy2face(object, depth, max_depth, scale_factor):
-    if depth < max_depth:
-        
+    if depth < max_depth:        
         cmds.select(object)
-        
-        face_centroids = []
         num_faces = cmds.polyEvaluate(f=True)
         
         for f in range(num_faces):
@@ -29,8 +27,8 @@ def copy2face(object, depth, max_depth, scale_factor):
 
             copy2face(new_obj[0], depth+1, max_depth, scale_factor)
 
-
-init_object = cmds.polyPlatonicSolid( r=2, l=2, st=0)
+# feed selected object into recursive function
+init_object = cmds.ls(sl=True, long=True)
 copy2face(object=init_object[0], depth=0, max_depth=3, scale_factor=0.33)
 
 
