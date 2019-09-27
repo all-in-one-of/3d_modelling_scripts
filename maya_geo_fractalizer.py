@@ -22,14 +22,17 @@ def instance_at_point(object, pos, rescale, rotation, rand_scale, rand_rot):
 def recursive_instancer(object, depth, max_depth, scale_factor, mode, rotation, rand_scale, rand_rot, mode_switching):   
     if mode_switching == True:
         modes = ['centroid', 'vertex']
-        mode = modes[random.randint(0, len(modes) - 1)]
+        mode = modes[randint(0, len(modes) - 1)]
         
     if depth < max_depth:        
         cmds.select(object)
         
+        # plane instances at face centroids
         if mode == 'centroid':
             num_faces = cmds.polyEvaluate(f=True)
-            
+        
+            # determine average of each face's vertices
+            # then place an instance at this point
             for f in range(num_faces):           
                 coords_sms = [0, 0, 0]
                 face = cmds.select(object + '.f[%i]' % f)
@@ -40,12 +43,12 @@ def recursive_instancer(object, depth, max_depth, scale_factor, mode, rotation, 
                     pos = cmds.pointPosition()            
                     for i in range(len(coords_sms)):
                         coords_sms[i] += pos[i]   
-                        
+                
                 face_center = [c/len(vertices) for c in coords_sms]
                 new_obj = instance_at_point(object, face_center, scale_factor, [i*depth for i in rotation], rand_scale, rand_rot)   
                 recursive_instancer(new_obj[0], depth+1, max_depth, scale_factor, mode, rotation, rand_scale, rand_rot, mode_switching)
  
-                
+        # place instances at vertices        
         elif mode == 'vertex':
             vertices = cmds.ls(cmds.polyListComponentConversion(toVertex=True), flatten=True)
             for v in vertices:
@@ -61,11 +64,11 @@ if init_object:
     depth=0, \
     max_depth=3, \
     scale_factor=[0.5, 0.5, 0.5], \
-    mode = 'centroid', \
+    mode = 'vertex', \
     rotation=[0, 0, 0], \
     rand_rot = [0, 0, 0], \
-    rand_scale = [0, 0.166, 0], \
-    mode_switching = True)
+    rand_scale = [0, 0, 0], \
+    mode_switching = False)
     
 else:
     print('Error: No initial object selected')
